@@ -1,7 +1,7 @@
 import socket
 import sys
 
-# Following this tutorial: https://www.geeksforgeeks.org/socket-programming-python/
+from Request import Request
 
 try:
 	# AF_INET = use IPv4 ; SOCK_STREAM = Use TCP protocol
@@ -15,7 +15,7 @@ except:
 port = 23456
 
 # maximum number of unaccepted connections before refusing new connnections
-max_pending = 5
+max_pending = 5 # arbitrary number for now
 
 # Bind the port
 # Empty string (instead of an ip) listens for all incoming requests (as opposed to only listening for a specific ip)
@@ -32,8 +32,8 @@ while True:
 	client_socket, addr = s.accept()
 	print('Connected with address ', addr)
 
-	request = client_socket.recv(1024)
-	print('Recieved: ', request)
+	r = Request(client_socket.recv(1024)) # recv(# of bytes to read)
+	r.print_request()
 
 	# Send message to client
 	client_socket.send('Thanks for connecting. Aufwiedersehen.')
