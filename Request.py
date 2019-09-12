@@ -1,16 +1,22 @@
+# HTTP Request format: https://www.tutorialspoint.com/http/http_requests.htm
+
 class Request:
 
 	request = '' # raw string
+	host = ''
+	port = ''
 	method = '' # GET, POST, etc.
 	url = '' # the requested webpage ex) bar.html
 	http_ver = '' # HTTP version
 	header_fields = {}
 	message_body = ''
 	
-	def __init__(self, request):
+	def __init__(self, request, addr):
 
 		self.request = request
-		
+		self.host = addr[0]
+		self.port = addr[1]
+	
 		# Parse HTTP request
 		rq = self.request.replace('\n', '').split('\r') 	
 
@@ -27,6 +33,7 @@ class Request:
 		self.message_body = rq[len(rq) - 1]
 
 	def print_request(self):
+		print('Host %s at Port %s' % (self.host, self.port))
 		print('Method: %s' % self.method)
 		print('Requested URL: %s' % self.url)
 		print(self.header_fields)
