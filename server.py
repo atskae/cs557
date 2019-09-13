@@ -1,8 +1,11 @@
 import socket
 import sys
 import logging # debug print statements
+from _thread import *
+import threading
 
-from Request import Request
+# serve() and Request class
+from Request import *
 
 # Set up debug logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -31,24 +34,20 @@ s.bind((host, port))
 
 # Go to listening mode
 s.listen(max_pending)
-#print('Socket at port %i in listening mode...' % port)
 logging.debug('Socket at port %i in listening mode...' % port)
 logging.debug('Clients can request with command: wget http://remote<XX>.cs.binghamton.edu:%i/<.html>' % port)
+
+# resource name (ex. bar.html) -> # accesses
+res_counts = {}
+res_lock = threading.Lock()
+res_path = 'www'
 
 # Infinitely listen for incoming TCP requests
 while True:
 	client_socket, addr = s.accept()
-	logging.debug('Connected with host %s at port %s' % (addr[0], addr[1]))
-	#print('Connected with address %s at port %s' % (addr[0], addr[1]))
-
 	r = Request(client_socket.recv(1024), addr) # recv(# of bytes to read)
-	r.print_request()
+	#r.print_request()
 
-	print("%s|%s|%s|%i" % (r.url, r.host, r.port, -1))
+	# start_new_thread(function, arguments as a tuple)
+	start_new_thread(serve, (client_socket, res_counts, res_lock, r))
 
-	# Send message to client
-	client_socket.send('Thanks for connecting. Aufwiedersehen.')
-
-	# Close the connection with client
-	client_socket.close()
-	logging.debug('Closed connection')
