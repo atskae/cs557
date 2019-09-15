@@ -1,6 +1,12 @@
 import socket
 import logging
 import threading
+import os
+import mimetypes
+
+from wsgiref.handlers import format_date_time # RFC format
+from datetime import datetime
+from time import mktime
 
 # serve() and Request class
 from Request import *
@@ -12,8 +18,8 @@ def get_date():
 	return format_date_time(stamp)
 
 class Server:
-	name = 'johto' # Name of the server
 
+	name = 'johto' # Name of the server
 	host = '' # Empty string (instead of an ip) listens for all incoming requests (as opposed to only listening for a specific ip)
 	sock = None # Socket to listen for incoming clients
 	port = 2048
@@ -24,12 +30,6 @@ class Server:
 	res_path = 'www'
 
 	def __init__(self, debug, host, sock, port):
-		self.host = host
-		self.sock = sock
-		self.port = port
-		self.lock = threading.Lock()
-	
-		self.sock.bind((host, port))
 
 		# Set up debug logging
 		if debug is True:
@@ -38,6 +38,14 @@ class Server:
 		else:
 			logging.disable(logging.DEBUG)
 
+		self.host = host
+		self.sock = sock
+		self.port = port
+		self.lock = threading.Lock()
+		mimetypes.init() # initalize the MIMETYPE dictionary
+
+		self.sock.bind((host, port))
+	
 	# Go into Listening Mode
 	def listen(self, max_pending):
 		self.max_pending = max_pending
@@ -60,14 +68,25 @@ class Server:
 			client_sock.send(r.http_ver + ' ' + '402 Not Found')
 			client_sock.close()
 			return
+
+		# Get content type
+		content_type = 'application/octet-stream' # default
+		try:
+			ct = mimetypes.guess_type(r.res)[0]
+			logging.debug('%s content type: %s' % (r.res, ct))
+			if ct is not None:
+				content_type = ct
+		except:
+			logging.debug('Failed to obtain content type for %s. Using default content type.', r.res)
 	
 		# Prepare response
 		response = ''
 		response += (r.http_ver + ' 200 OK\n')
 		response += ('Date: ' + get_date() + '\n')
-		response += ('Last-Modified: ' + str(os.path.getmtime(path)) + '\n')
-		response += ('Content-Type: ' + '\n')
-		response += ('Content-Length: ' + '-1\n')
+		response += ('Server: ' + self.name + '\n')
+		response += ('Last-Modified: ' + format_date_time(os.path.getmtime(path)) + '\n')
+		response += ('Content-Type: ' + content_type + '\n')
+		response += ('Content-Length: ' + str(os.path.getsize(path)) + '\n')
 		logging.debug('Response:\n%s' % response)
 	
 		# Send requested file to client

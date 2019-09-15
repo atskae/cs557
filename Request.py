@@ -1,11 +1,5 @@
-import logging
-import os
-from wsgiref.handlers import format_date_time # RFC format
-from datetime import datetime
-from time import mktime
 
 # HTTP Request format: https://www.tutorialspoint.com/http/http_requests.htm
-
 class Request:
 
 	request = '' # raw string
