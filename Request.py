@@ -1,37 +1,10 @@
 import logging
+import os
+from wsgiref.handlers import format_date_time # RFC format
+from datetime import datetime
+from time import mktime
 
 # HTTP Request format: https://www.tutorialspoint.com/http/http_requests.htm
-
-# creates a thread per TCP connection
-def serve(socket, res_counts, lock, r):
-	logging.debug('Connected with host %s at port %s' % (r.host, r.port))
-	
-	# check if this resource exists
-	path = 'www' + r.res
-	f = None
-	try:
-		f = open(path, 'r')
-	except:
-		logging.debug('%s does not exist.' % path)
-		# send error message to client
-		socket.send('Error: File does not exist')
-		socket.close()
-		return
-
-	# Send requested file to client
-	socket.sendall(f.read())
-	f.close()
-
-	lock.acquire()
-	if r.res not in res_counts.keys():
-		res_counts[r.res] = 0
-	res_counts[r.res] += 1	
-	print("%s|%s|%s|%i" % (r.res, r.host, r.port, res_counts[r.res]))
-	lock.release()
-
-	# Close the connection with client
-	socket.close()
-	logging.debug('Closed connection')
 
 class Request:
 
