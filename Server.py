@@ -49,8 +49,8 @@ class Server:
 	# Go into Listening Mode
 	def listen(self, max_pending):
 		self.max_pending = max_pending
-		
 		self.sock.listen(max_pending)
+		
 		logging.debug('Socket at port %i in listening mode...' % self.port)
 		logging.debug('Clients can request with command: wget http://remote<XX>.cs.binghamton.edu:%i/<.html>' % self.port)
 
@@ -87,12 +87,14 @@ class Server:
 		response += ('Last-Modified: ' + format_date_time(os.path.getmtime(path)) + '\n')
 		response += ('Content-Type: ' + content_type + '\n')
 		response += ('Content-Length: ' + str(os.path.getsize(path)) + '\n')
-		logging.debug('Response:\n%s' % response)
+		response += '\n'
 	
 		# Send requested file to client
-		client_sock.sendall(f.read())
+		response += (f.read())	
+		logging.debug('Response:\n%s' % response)
+		client_sock.sendall(response)
 		f.close()
-	
+		
 		self.lock.acquire()
 		if r.res not in self.res_counts.keys():
 			self.res_counts[r.res] = 0
