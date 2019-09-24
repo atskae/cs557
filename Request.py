@@ -23,9 +23,12 @@ class Request:
 
 		# Request-Line
 		line = rq[0].split(' ')
-		self.method = line[0]
-		self.res = line[1]
-		self.http_ver = line[2]
+		try:
+			self.method = line[0]
+			self.res = line[1]
+			self.http_ver = line[2]
+		except:
+			print('Out of bounds while reading request')
 
 		for i in range(1, len(rq) - 2):
 			fields = rq[i].split(': ')

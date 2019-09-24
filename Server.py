@@ -50,7 +50,8 @@ class Server:
 	def listen(self, max_pending):
 		self.max_pending = max_pending
 		self.sock.listen(max_pending)
-		
+	
+		print("Server in listening mode at host %s, port %i..." % (socket.gethostname(), self.port))
 		logging.debug('Socket at port %i in listening mode...' % self.port)
 		logging.debug('Clients can request with command: wget http://remote<XX>.cs.binghamton.edu:%i/<.html>' % self.port)
 
