@@ -1,0 +1,2 @@
+#!/bin/sh
+python src/run-branch.py $1 $2 $3
